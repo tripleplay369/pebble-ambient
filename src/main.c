@@ -82,6 +82,23 @@ static void update_proc(Layer * layer, GContext * ctx) {
     graphics_draw_line(ctx, TICK_MARKS[i][0], TICK_MARKS[i][1]);
     graphics_fill_circle(ctx, TICK_MARKS[i][1], STROKE_WIDTH / 2);
   }
+
+  // watch hands
+  graphics_context_set_fill_color(ctx, (GColor)GColorBlackARGB8);
+  graphics_context_set_stroke_color(ctx, (GColor)GColorBlackARGB8);
+  graphics_context_set_stroke_width(ctx, STROKE_WIDTH);
+  GPoint minute_location, hour_location;
+  int32_t minute_angle = TRIG_MAX_ANGLE * now_tm->tm_min / 60 - TRIG_MAX_ANGLE / 4;
+  int32_t hour_angle = TRIG_MAX_ANGLE * now_tm->tm_hour / 12 - TRIG_MAX_ANGLE / 4;
+  minute_location.x = CENTER.x + cos_lookup(minute_angle) * MINUTE_RADIUS / TRIG_MAX_RATIO;
+  minute_location.y = CENTER.y + sin_lookup(minute_angle) * MINUTE_RADIUS / TRIG_MAX_RATIO;
+  hour_location.x = CENTER.x + cos_lookup(hour_angle) * HOUR_RADIUS / TRIG_MAX_RATIO;
+  hour_location.y = CENTER.y + sin_lookup(hour_angle) * HOUR_RADIUS / TRIG_MAX_RATIO;
+  graphics_draw_line(ctx, CENTER, hour_location);
+  graphics_draw_line(ctx, CENTER, minute_location);
+  graphics_fill_circle(ctx, CENTER, STROKE_WIDTH / 2);
+  graphics_fill_circle(ctx, minute_location, STROKE_WIDTH / 2);
+  graphics_fill_circle(ctx, hour_location, STROKE_WIDTH / 2);
   
   // planets
   graphics_context_set_stroke_width(ctx, PLANET_STROKE_WIDTH);
@@ -97,22 +114,6 @@ static void update_proc(Layer * layer, GContext * ctx) {
     graphics_fill_circle(ctx, planet_location, PLANET_RADIUS);
     graphics_draw_circle(ctx, planet_location, PLANET_RADIUS);
   }
-  
-  // watch hands
-  graphics_context_set_fill_color(ctx, (GColor)GColorBlackARGB8);
-  graphics_context_set_stroke_width(ctx, STROKE_WIDTH);
-  GPoint minute_location, hour_location;
-  int32_t minute_angle = TRIG_MAX_ANGLE * now_tm->tm_min / 60 - TRIG_MAX_ANGLE / 4;
-  int32_t hour_angle = TRIG_MAX_ANGLE * now_tm->tm_hour / 12 - TRIG_MAX_ANGLE / 4;
-  minute_location.x = CENTER.x + cos_lookup(minute_angle) * MINUTE_RADIUS / TRIG_MAX_RATIO;
-  minute_location.y = CENTER.y + sin_lookup(minute_angle) * MINUTE_RADIUS / TRIG_MAX_RATIO;
-  hour_location.x = CENTER.x + cos_lookup(hour_angle) * HOUR_RADIUS / TRIG_MAX_RATIO;
-  hour_location.y = CENTER.y + sin_lookup(hour_angle) * HOUR_RADIUS / TRIG_MAX_RATIO;
-  graphics_draw_line(ctx, CENTER, hour_location);
-  graphics_draw_line(ctx, CENTER, minute_location);
-  graphics_fill_circle(ctx, CENTER, STROKE_WIDTH / 2);
-  graphics_fill_circle(ctx, minute_location, STROKE_WIDTH / 2);
-  graphics_fill_circle(ctx, hour_location, STROKE_WIDTH / 2);
 }
 
 static void main_window_load(Window * window) {
