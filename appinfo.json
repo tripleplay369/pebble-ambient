@@ -1,0 +1,22 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "green.kelby@gmail.com",
+    "longName": "Ambient",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "sdkVersion": "3",
+    "shortName": "Ambient",
+    "targetPlatforms": [
+        "basalt"
+    ],
+    "uuid": "6b9eaf19-a472-4221-b6c0-09299cab560e",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
