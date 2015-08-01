@@ -35,8 +35,8 @@ static const uint8_t SKY_COLORS[] = {
 static GPoint TICK_MARKS[12][2];
 static const GPoint CENTER = {72, 84};
 static const int RADIUS = 70;
-static const int MINUTE_RADIUS = 50;
-static const int HOUR_RADIUS = 35;
+static const int MINUTE_RADIUS = 58;
+static const int HOUR_RADIUS = 40;
 static const int STROKE_WIDTH = 4;
 static const int TICK_LENGTH = 4;
 static const int PLANET_RADIUS = 3;
