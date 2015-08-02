@@ -12,14 +12,14 @@ static const float DEGREES_PER_DAY[] = {
 };
 
 static const float DEGREES_AT_REFERENCE[] = {
-  281.18017f,
-  20.17002f,
-  333.58600f,
-  73.77336f,
-  292.64251f,
-  8.91324f,
-  298.87491f,
-  297.58472f
+  281.18017f + 180.0f,
+  20.17002f + 180.0f,
+  333.58600f + 180.0f,
+  73.77336f + 180.0f,
+  292.64251f + 180.0f,
+  8.91324f + 180.0f,
+  298.87491f + 180.0f,
+  297.58472f + 180.0f
 };
   
 static const time_t REFERENCE_TIME = 840931200;
