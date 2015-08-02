@@ -42,6 +42,8 @@ static const int TICK_LENGTH = 4;
 static const int PLANET_RADIUS = 3;
 static const int PLANET_STROKE_WIDTH = 2;
 static const int ORBIT_STROKE_WIDTH = 1;
+static const int PLANET_OFFSET = 7;
+static const int PLANET_SPACING = 8;
 
 static void calculate_tick_marks() {
   for(int i = 0; i < 12; ++i) {
@@ -72,7 +74,7 @@ static void update_proc(Layer * layer, GContext * ctx) {
   graphics_context_set_stroke_width(ctx, ORBIT_STROKE_WIDTH);
   graphics_context_set_stroke_color(ctx, (GColor)GColorLightGrayARGB8);
   for (int i = 0; i < N_PLANETS; ++i) {
-    int radius = 7 + 8 * i;
+    int radius = PLANET_OFFSET + PLANET_SPACING * i;
     graphics_draw_circle(ctx, CENTER, radius);
   }
   
@@ -105,7 +107,7 @@ static void update_proc(Layer * layer, GContext * ctx) {
   graphics_context_set_stroke_color(ctx, (GColor)GColorBlackARGB8);
   calculate_planet_time(now);
   for (int i = 0; i < N_PLANETS; ++i) {
-    int radius = 7 + 8 * i;
+    int radius = PLANET_OFFSET + PLANET_SPACING * i;
     graphics_context_set_fill_color(ctx, (GColor)PLANET_COLORS[i]);
     int32_t angle = get_planet_angle(i);
     GPoint planet_location;
