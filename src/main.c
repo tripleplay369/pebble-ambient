@@ -89,7 +89,7 @@ static void update_proc(Layer * layer, GContext * ctx) {
   graphics_context_set_stroke_width(ctx, STROKE_WIDTH);
   GPoint minute_location, hour_location;
   int32_t minute_angle = TRIG_MAX_ANGLE * now_tm->tm_min / 60 - TRIG_MAX_ANGLE / 4;
-  int32_t hour_angle = TRIG_MAX_ANGLE * now_tm->tm_hour / 12 - TRIG_MAX_ANGLE / 4;
+  int32_t hour_angle = (TRIG_MAX_ANGLE * (((now_tm->tm_hour % 12) * 6) + (now_tm->tm_min / 10))) / (12 * 6) - TRIG_MAX_ANGLE / 4;
   minute_location.x = CENTER.x + cos_lookup(minute_angle) * MINUTE_RADIUS / TRIG_MAX_RATIO;
   minute_location.y = CENTER.y + sin_lookup(minute_angle) * MINUTE_RADIUS / TRIG_MAX_RATIO;
   hour_location.x = CENTER.x + cos_lookup(hour_angle) * HOUR_RADIUS / TRIG_MAX_RATIO;
