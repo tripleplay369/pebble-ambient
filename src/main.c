@@ -129,7 +129,7 @@ static void update_proc(Layer * layer, GContext * ctx) {
     graphics_draw_circle(ctx, planet_locations[i], PLANET_RADII[i]);
   }
   
-  // moon
+  // moon (draw as square to get something like a circle with radius between 1 and 2 pixels, ie diameter 3)
   graphics_context_set_fill_color(ctx, (GColor)GColorBlackARGB8);
   graphics_fill_rect(ctx, GRect(moon_location.x - MOON_DIAMETER / 2, moon_location.y - MOON_DIAMETER / 2, MOON_DIAMETER, MOON_DIAMETER), MOON_DIAMETER / 2, GCornersAll);
   graphics_context_set_fill_color(ctx, (GColor)MOON_COLOR);
