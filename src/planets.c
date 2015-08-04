@@ -21,6 +21,9 @@ static const float DEGREES_AT_REFERENCE[] = {
   298.87491f + 180.0f,
   297.58472f + 180.0f
 };
+
+static const float MOON_DEGREES_AT_REFERENCE = 280.36375f + 180.0f;
+static const float MOON_DEGREES_PER_DAY = 13.17619501f;
   
 static const time_t REFERENCE_TIME = 840931200;
 static const int SECONDS_PER_DAY = 86400;
@@ -34,5 +37,10 @@ void calculate_planet_time(time_t now)
   
 int32_t get_planet_angle(int index) {
   int degrees = (int)(DEGREES_AT_REFERENCE[index] + DEGREES_PER_DAY[index] * days_since_reference) % 360;
+  return TRIG_MAX_ANGLE * degrees / 360;
+}
+
+int32_t get_moon_angle() {
+  int degrees = (int)(MOON_DEGREES_AT_REFERENCE + MOON_DEGREES_PER_DAY * days_since_reference) % 360;
   return TRIG_MAX_ANGLE * degrees / 360;
 }

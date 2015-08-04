@@ -43,9 +43,11 @@ static const int PLANET_STROKE_WIDTH = 1;
 static const int ORBIT_STROKE_WIDTH = 1;
 static const int PLANET_OFFSET = 7;
 static const int PLANET_SPACING = 8;
+static const int EARTH_INDEX = 2;
+static const int MOON_ORBIT_RADIUS = 5;
 
 static void calculate_tick_marks() {
-  for(int i = 0; i < 12; ++i) {
+  for (int i = 0; i < 12; ++i) {
     int32_t angle = TRIG_MAX_ANGLE * i / 12;
     TICK_MARKS[i][0].x = CENTER.x + cos_lookup(angle) * (RADIUS - STROKE_WIDTH / 2) / TRIG_MAX_RATIO;
     TICK_MARKS[i][0].y = CENTER.y + sin_lookup(angle) * (RADIUS - STROKE_WIDTH / 2) / TRIG_MAX_RATIO;
@@ -57,6 +59,20 @@ static void calculate_tick_marks() {
 static void update_proc(Layer * layer, GContext * ctx) {
   time_t now = time(NULL); 
   struct tm * now_tm = localtime(&now);
+  
+  // calculate planet locations
+  GPoint planet_locations[N_PLANETS];
+  GPoint moon_location;
+  calculate_planet_time(now);
+  for (int i = 0; i < N_PLANETS; ++i) {
+    int radius = PLANET_OFFSET + PLANET_SPACING * i;
+    int32_t angle = get_planet_angle(i);
+    planet_locations[i].x = CENTER.x + cos_lookup(angle) * radius / TRIG_MAX_RATIO;
+    planet_locations[i].y = CENTER.y + sin_lookup(angle) * radius / TRIG_MAX_RATIO;
+  }
+  int32_t angle = get_moon_angle();
+  moon_location.x = planet_locations[EARTH_INDEX].x + cos_lookup(angle) * MOON_ORBIT_RADIUS / TRIG_MAX_RATIO;
+  moon_location.y = planet_locations[EARTH_INDEX].y + sin_lookup(angle) * MOON_ORBIT_RADIUS / TRIG_MAX_RATIO;
   
   // background
   graphics_context_set_fill_color(ctx, (GColor)SKY_COLORS[now_tm->tm_hour]);
@@ -106,17 +122,16 @@ static void update_proc(Layer * layer, GContext * ctx) {
   // planets
   graphics_context_set_stroke_width(ctx, PLANET_STROKE_WIDTH);
   graphics_context_set_stroke_color(ctx, (GColor)GColorBlackARGB8);
-  calculate_planet_time(now);
   for (int i = 0; i < N_PLANETS; ++i) {
-    int radius = PLANET_OFFSET + PLANET_SPACING * i;
     graphics_context_set_fill_color(ctx, (GColor)PLANET_COLORS[i]);
-    int32_t angle = get_planet_angle(i);
-    GPoint planet_location;
-    planet_location.x = CENTER.x + cos_lookup(angle) * radius / TRIG_MAX_RATIO;
-    planet_location.y = CENTER.y + sin_lookup(angle) * radius / TRIG_MAX_RATIO;
-    graphics_fill_circle(ctx, planet_location, PLANET_RADII[i]);
-    graphics_draw_circle(ctx, planet_location, PLANET_RADII[i]);
+    graphics_fill_circle(ctx, planet_locations[i], PLANET_RADII[i]);
+    graphics_draw_circle(ctx, planet_locations[i], PLANET_RADII[i]);
   }
+  
+  // moon
+  graphics_context_set_fill_color(ctx, (GColor)MOON_COLOR);
+  graphics_fill_circle(ctx, moon_location, MOON_RADIUS);
+  graphics_draw_circle(ctx, moon_location, MOON_RADIUS);
 }
 
 static void main_window_load(Window * window) {

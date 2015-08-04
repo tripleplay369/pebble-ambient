@@ -26,5 +26,9 @@ static const uint8_t PLANET_RADII[] = {
 
 static const int N_PLANETS = 8;
 
+static const uint8_t MOON_COLOR = GColorLightGrayARGB8;
+static const uint8_t MOON_RADIUS = 1;
+
 void calculate_planet_time(time_t now);
 int32_t get_planet_angle(int index);
+int32_t get_moon_angle();
