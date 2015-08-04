@@ -9,8 +9,19 @@ static const uint8_t PLANET_COLORS[] = {
   GColorDarkCandyAppleRedARGB8,
   GColorWindsorTanARGB8,
   GColorPastelYellowARGB8,
-  GColorLightGrayARGB8,
+  GColorCelesteARGB8,
   GColorBlueMoonARGB8
+};
+
+static const uint8_t PLANET_RADII[] = {
+  2,
+  2,
+  2,
+  2,
+  4,
+  4,
+  3,
+  3
 };
 
 static const int N_PLANETS = 8;
