@@ -92,6 +92,7 @@ static void update_proc(Layer * layer, GContext * ctx) {
     int radius = PLANET_OFFSET + PLANET_SPACING * i;
     graphics_draw_circle(ctx, CENTER, radius);
   }
+  graphics_draw_circle(ctx, planet_locations[EARTH_INDEX], MOON_ORBIT_RADIUS);
   
   // watch tick marks
   graphics_context_set_fill_color(ctx, (GColor)GColorBlackARGB8);
@@ -129,9 +130,10 @@ static void update_proc(Layer * layer, GContext * ctx) {
   }
   
   // moon
+  graphics_context_set_fill_color(ctx, (GColor)GColorBlackARGB8);
+  graphics_fill_rect(ctx, GRect(moon_location.x - MOON_DIAMETER / 2, moon_location.y - MOON_DIAMETER / 2, MOON_DIAMETER, MOON_DIAMETER), MOON_DIAMETER / 2, GCornersAll);
   graphics_context_set_fill_color(ctx, (GColor)MOON_COLOR);
-  graphics_fill_circle(ctx, moon_location, MOON_RADIUS);
-  graphics_draw_circle(ctx, moon_location, MOON_RADIUS);
+  graphics_fill_rect(ctx, GRect(moon_location.x - (MOON_DIAMETER / 2 - 1), moon_location.y - (MOON_DIAMETER / 2 - 1), MOON_DIAMETER / 2, MOON_DIAMETER / 2), MOON_DIAMETER / 2, GCornersAll);
 }
 
 static void main_window_load(Window * window) {
