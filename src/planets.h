@@ -3,7 +3,7 @@
 #include <pebble.h>
   
 static const uint8_t PLANET_COLORS[] = {
-  GColorPastelYellowARGB8,
+  GColorLightGrayARGB8,
   GColorIcterineARGB8,
   GColorCobaltBlueARGB8,
   GColorDarkCandyAppleRedARGB8,
@@ -24,7 +24,7 @@ static const uint8_t PLANET_RADII[] = {
   3
 };
 
-static const int N_PLANETS = 8;
+#define N_PLANETS 8
 
 static const uint8_t MOON_COLOR = GColorLightGrayARGB8;
 static const uint8_t MOON_DIAMETER = 4;

@@ -46,6 +46,13 @@ static const int PLANET_SPACING = 8;
 static const int EARTH_INDEX = 2;
 static const int MOON_ORBIT_RADIUS = 5;
 
+static GPoint planet_locations[N_PLANETS];
+static GPoint moon_location;
+static GColor sky_color;
+static GPoint minute_location, hour_location;
+static PropertyAnimation * hour_animation;
+static PropertyAnimation * minute_animation;
+
 static void calculate_tick_marks() {
   for (int i = 0; i < 12; ++i) {
     int32_t angle = TRIG_MAX_ANGLE * i / 12;
@@ -56,13 +63,20 @@ static void calculate_tick_marks() {
   }
 }
 
-static void update_proc(Layer * layer, GContext * ctx) {
+static void gpoint_setter(void * subject, GPoint gpoint) {
+  ((GPoint *)subject)->x = gpoint.x;
+  ((GPoint *)subject)->y = gpoint.y;
+  layer_mark_dirty(main_layer);
+}
+
+static void calculate() {
   time_t now = time(NULL); 
   struct tm * now_tm = localtime(&now);
   
+  // background
+  sky_color = (GColor)SKY_COLORS[now_tm->tm_hour];
+  
   // calculate planet locations
-  GPoint planet_locations[N_PLANETS];
-  GPoint moon_location;
   calculate_planet_time(now);
   for (int i = 0; i < N_PLANETS; ++i) {
     int radius = PLANET_OFFSET + PLANET_SPACING * i;
@@ -74,8 +88,66 @@ static void update_proc(Layer * layer, GContext * ctx) {
   moon_location.x = planet_locations[EARTH_INDEX].x + cos_lookup(angle) * MOON_ORBIT_RADIUS / TRIG_MAX_RATIO;
   moon_location.y = planet_locations[EARTH_INDEX].y + sin_lookup(angle) * MOON_ORBIT_RADIUS / TRIG_MAX_RATIO;
   
+  // watch hands
+  int32_t minute_angle = TRIG_MAX_ANGLE * now_tm->tm_min / 60 - TRIG_MAX_ANGLE / 4;
+  int32_t hour_angle = (TRIG_MAX_ANGLE * (((now_tm->tm_hour % 12) * 6) + (now_tm->tm_min / 10))) / (12 * 6) - TRIG_MAX_ANGLE / 4;
+  minute_location.x = CENTER.x + cos_lookup(minute_angle) * MINUTE_RADIUS / TRIG_MAX_RATIO;
+  minute_location.y = CENTER.y + sin_lookup(minute_angle) * MINUTE_RADIUS / TRIG_MAX_RATIO;
+  hour_location.x = CENTER.x + cos_lookup(hour_angle) * HOUR_RADIUS / TRIG_MAX_RATIO;
+  hour_location.y = CENTER.y + sin_lookup(hour_angle) * HOUR_RADIUS / TRIG_MAX_RATIO;
+}
+
+static void init_animations() {
+  static const PropertyAnimationImplementation implementation = {
+    .base = {
+      .update = (AnimationUpdateImplementation)property_animation_update_gpoint,
+    },
+    .accessors = {
+      .setter = { .gpoint = gpoint_setter, },
+    },
+  };
+  
+  minute_animation = property_animation_create(&implementation, &minute_location, NULL, NULL);
+  hour_animation = property_animation_create(&implementation, &hour_location, NULL, NULL);
+}
+
+static void destroy_minute_animation(Animation * animation, bool finished, void * context) {
+  property_animation_destroy(minute_animation);
+}
+
+static void destroy_hour_animation(Animation * animation, bool finished, void * context) {
+  property_animation_destroy(hour_animation);
+}
+
+static void animate() {
+  init_animations();
+  
+  property_animation_from(minute_animation, &minute_location, sizeof(minute_location), true);
+  property_animation_from(hour_animation, &hour_location, sizeof(hour_location), true);
+  
+  calculate();
+  
+  property_animation_to(minute_animation, &minute_location, sizeof(minute_location), true);
+  property_animation_to(hour_animation, &hour_location, sizeof(hour_location), true);
+  
+  Animation * minute_base_animation = property_animation_get_animation(minute_animation);
+  Animation * hour_base_animation = property_animation_get_animation(hour_animation);
+  
+  animation_set_handlers(minute_base_animation, (AnimationHandlers) {
+    .stopped = destroy_minute_animation
+  }, NULL);
+
+  animation_set_handlers(hour_base_animation, (AnimationHandlers) {
+    .stopped = destroy_hour_animation
+  }, NULL);
+  
+  animation_schedule(minute_base_animation);
+  animation_schedule(hour_base_animation);
+}
+
+static void update_proc(Layer * layer, GContext * ctx) {
   // background
-  graphics_context_set_fill_color(ctx, (GColor)SKY_COLORS[now_tm->tm_hour]);
+  graphics_context_set_fill_color(ctx, sky_color);
   graphics_fill_rect(ctx, GRect(0, 0, 144, 168), 0, GCornerNone);
   
   // watch circle
@@ -107,13 +179,6 @@ static void update_proc(Layer * layer, GContext * ctx) {
   graphics_context_set_fill_color(ctx, (GColor)GColorBlackARGB8);
   graphics_context_set_stroke_color(ctx, (GColor)GColorBlackARGB8);
   graphics_context_set_stroke_width(ctx, STROKE_WIDTH);
-  GPoint minute_location, hour_location;
-  int32_t minute_angle = TRIG_MAX_ANGLE * now_tm->tm_min / 60 - TRIG_MAX_ANGLE / 4;
-  int32_t hour_angle = (TRIG_MAX_ANGLE * (((now_tm->tm_hour % 12) * 6) + (now_tm->tm_min / 10))) / (12 * 6) - TRIG_MAX_ANGLE / 4;
-  minute_location.x = CENTER.x + cos_lookup(minute_angle) * MINUTE_RADIUS / TRIG_MAX_RATIO;
-  minute_location.y = CENTER.y + sin_lookup(minute_angle) * MINUTE_RADIUS / TRIG_MAX_RATIO;
-  hour_location.x = CENTER.x + cos_lookup(hour_angle) * HOUR_RADIUS / TRIG_MAX_RATIO;
-  hour_location.y = CENTER.y + sin_lookup(hour_angle) * HOUR_RADIUS / TRIG_MAX_RATIO;
   graphics_draw_line(ctx, CENTER, hour_location);
   graphics_draw_line(ctx, CENTER, minute_location);
   graphics_fill_circle(ctx, CENTER, STROKE_WIDTH / 2);
@@ -149,7 +214,7 @@ static void main_window_unload(Window * window) {
 }
 
 static void tick_handler(struct tm * tick_time, TimeUnits units_changed) {
-  layer_mark_dirty(main_layer);
+  animate();
 }
 
 static void init() {
@@ -163,6 +228,7 @@ static void init() {
   window_stack_push(main_window, true);
   
   calculate_tick_marks();
+  calculate();
     
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 }
